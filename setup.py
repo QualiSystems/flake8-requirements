@@ -16,7 +16,7 @@ with open(get_abs_path("README.rst")) as f:
     long_description = f.read()
 
 setup(
-    name="flake8-requirements",
+    name="flake8-requirements-absolute-imports",
     version=version,
     author="Arkadiusz Bokowy",
     author_email="arkadiusz.bokowy@gmail.com",

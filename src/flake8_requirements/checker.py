@@ -18,7 +18,7 @@ from .modules import STDLIB_PY2
 from .modules import STDLIB_PY3
 
 # NOTE: Changing this number will alter package version as well.
-__version__ = "1.6.0"
+__version__ = "1.6.0.1"
 __license__ = "MIT"
 
 LOG = getLogger('flake8.plugin.requirements')
@@ -307,6 +307,9 @@ class Flake8Checker(object):
     # User defined project->modules mapping.
     known_modules = {}
 
+    # User project base module
+    project_base_module = ""
+
     # User provided requirements file.
     requirements_file = None
 
@@ -337,6 +340,13 @@ class Flake8Checker(object):
                 " provided modules. For example: ``--known-modules=project:"
                 "[Project],extra-project:[extras,utilities]``."
             ),
+            **kw
+        )
+        manager.add_option(
+            "--project-base-module",
+            action="store",
+            default="",
+            help="Specify project name if using absolute imports. For example: 'src'",
             **kw
         )
         manager.add_option(
@@ -382,6 +392,7 @@ class Flake8Checker(object):
                 for x in re.split(r"],?", options.known_modules)[:-1]
             ]
         }
+        cls.project_base_module = options.project_base_module
         cls.requirements_file = options.requirements_file
         cls.requirements_max_depth = options.requirements_max_depth
         if options.scan_host_site_packages:
@@ -701,6 +712,8 @@ class Flake8Checker(object):
         if node.module in self.get_mods_3rd_party():
             return
         if node.module in self.get_mods_1st_party():
+            return
+        if self.project_base_module and ".".join(node.module).startswith(self.project_base_module):
             return
         # When processing setup.py file, forcefully add setuptools to the
         # project requirements. Setuptools might be required to build the
